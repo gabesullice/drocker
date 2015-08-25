@@ -18,6 +18,16 @@ SQL_CREDENTIALS=-e MYSQL_DATABASE=drupal \
 								-e MYSQL_USER=drupal \
 								-e MYSQL_PASSWORD=myotherpass 
 
+start:
+	docker start mysql
+	docker start mail
+	docker start drupal
+
+stop:
+	docker stop mysql
+	docker stop mail
+	docker stop drupal
+
 run: php mysql mailcatcher
 	- docker kill $(PHP_CONTAINER_NAME)
 	- docker rm $(PHP_CONTAINER_NAME)
