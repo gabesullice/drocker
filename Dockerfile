@@ -7,17 +7,17 @@ RUN apt-get update && apt-get install -y git libpng12-dev libjpeg-dev libpq-dev 
 
 RUN a2enmod rewrite
 
-RUN curl -sS https://getcomposer.org/installer | php && \
-    mv composer.phar /usr/local/bin/composer
+#RUN curl -sS https://getcomposer.org/installer | php && \
+#    mv composer.phar /usr/local/bin/composer
 
-ADD https://github.com/drush-ops/drush/archive/7.0.0.tar.gz /root/drush-7.0.0.tar.gz
-
-RUN cd /root && \
-    tar -xzf /root/drush-7.0.0.tar.gz && \
-    chmod u+x /root/drush-7.0.0/drush && \
-    ln -s /root/drush-7.0.0/drush /usr/bin/drush &&\
-    cd /root/drush-7.0.0 && \
-    composer install
+#ADD https://github.com/drush-ops/drush/archive/7.0.0.tar.gz /root/drush-7.0.0.tar.gz
+#
+#RUN cd /root && \
+#    tar -xzf /root/drush-7.0.0.tar.gz && \
+#    chmod u+x /root/drush-7.0.0/drush && \
+#    ln -s /root/drush-7.0.0/drush /usr/bin/drush &&\
+#    cd /root/drush-7.0.0 && \
+#    composer install
 
 COPY config/php.ini /usr/local/etc/php/
 COPY config/*.conf /etc/apache2/sites-available/
