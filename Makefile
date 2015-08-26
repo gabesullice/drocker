@@ -1,3 +1,5 @@
+include config/make.conf
+
 PHP_CONTAINER_NAME=drupal
 PHP_IMAGE_NAME=apache-php
 
@@ -7,11 +9,11 @@ SQL_IMAGE_NAME=mysql:5.6
 MAIL_CONTAINER_NAME=mail
 MAIL_IMAGE_NAME=schickling/mailcatcher
 
-PHP_VOLUMES=-v "$(shell pwd)/site/data:/var/www/site/data" \
-						-v "/data/site/docroot:/var/www/site/docroot" \
-						-v "/data/site/files:/data/site/files"
+PHP_VOLUMES=-v "/var/docker/$(PROJECT_NAME)/share:/var/www/site/share" \
+						-v "/var/docker/$(PROJECT_NAME)/docroot:/var/www/site/docroot" \
+						-v "/var/docker/$(PROJECT_NAME)/files:/var/www/site/files"
 
-SQL_VOLUMES=-v "/data/sql:/var/lib/mysql"
+SQL_VOLUMES=-v "/var/docker/$(PROJECT_NAME)/sql:/var/lib/mysql"
 
 SQL_ROOT_PASS=-e MYSQL_ROOT_PASSWORD=mysupersecretpass
 SQL_CREDENTIALS=-e MYSQL_DATABASE=drupal \
@@ -33,7 +35,7 @@ run: php mysql mailcatcher
 	- docker rm $(PHP_CONTAINER_NAME)
 	docker run -d --name $(PHP_CONTAINER_NAME) \
 		$(PHP_VOLUMES) \
-		-p 80:80 \
+		-p $(LOCAL_WEB_PORT):80 \
 		--link $(SQL_CONTAINER_NAME):sql \
 		--link $(MAIL_CONTAINER_NAME):mail \
 		$(PHP_IMAGE_NAME)
@@ -58,6 +60,6 @@ mailcatcher:
 	- docker rm $(MAIL_CONTAINER_NAME)
 	docker run -d \
 		--name $(MAIL_CONTAINER_NAME) \
-		-p 1080:1080 \
+		-p $(LOCAL_MAIL_PORT):1080 \
 		$(MAIL_IMAGE_NAME)
 	

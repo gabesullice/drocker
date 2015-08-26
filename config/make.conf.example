@@ -1,0 +1,4 @@
+PROJECT_NAME=example
+
+LOCAL_WEB_PORT=8080 # The port used to access your site
+LOCAL_MAIL_PORT=1080 # The port used to access mailcatcher
