@@ -31,7 +31,7 @@ RUN apt-get update && apt-get install -y \
 ADD http://files.drush.org/drush.phar /usr/local/bin/drush
 RUN chmod +x /usr/local/bin/drush && drush init -y
 
-ADD https://ftp.drupal.org/files/projects/drupal-7.42.tar.gz /opt/drupal.tar.gz
+ADD https://ftp.drupal.org/files/projects/drupal-7.43.tar.gz /opt/drupal.tar.gz
 
 RUN mkdir -p /opt/drupal \
     && tar -xvzf /opt/drupal.tar.gz -C /opt/drupal --strip-components=1 \
