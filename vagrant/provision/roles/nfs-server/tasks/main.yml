@@ -19,7 +19,7 @@
 
 - name: add nfs export
   become: yes
-  lineinfile: line="/var/www *(rw,sync)" dest=/etc/exports
+  lineinfile: line="/var/www *(rw,sync,all_squash,anonuid=1000,anongid=1000)" dest=/etc/exports
   notify:
     - restart nfs
 
