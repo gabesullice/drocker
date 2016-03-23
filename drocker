@@ -1,0 +1,45 @@
+#!/bin/bash
+
+set -e
+
+script_name=$0
+project_name=$(basename $PWD)
+drush_image=${drush_image:=gabesullice/drocker-drush}
+mysql_container=${mysql_container:=$(printf "%b%b" $project_name "_mysql_1")}
+drupal_container=${drupal_container:=$(printf "%b%b" $project_name "_drupal_1")}
+docker_network=${docker_network:=$(printf "%b%b" $project_name "_default")}
+
+main () {
+  local subcmd=$1
+  local args=${@:2}
+
+  if [ $# -lt 1 ]; then
+    printf "You must provide at least one subcommand. See %b [SUBCMD] help.\nPossible subcmds are:\n\tsql-import\n\tdrush\n" $script_name
+    exit 1
+  fi
+
+  $subcmd $args
+}
+
+drush () {
+  local args=${@:1}
+
+  if [ "$1" = "help" ]; then
+    printf "Usage: %b %b [...drush args]\n" $script_name $FUNCNAME
+    exit 0
+  fi
+
+  echo "docker run -i --volumes-from=$drupal_container --net=$docker_network $drush_image drush $args"
+  docker run -i --volumes-from=$drupal_container --net=$docker_network $drush_image drush $args
+}
+
+sql-import () {
+  if [ "$1" = "help" ]; then
+    printf "Usage: %b %b \e[4mFILE\e[0m\n" $script_name $FUNCNAME
+    exit 0
+  fi
+  echo "docker run -i --volumes-from=$drupal_container --net=$docker_network $drush_image drush sql-cli < $1"
+  docker run -i --volumes-from=$drupal_container --net=$docker_network $drush_image drush sql-cli < $1
+}
+
+main $@
