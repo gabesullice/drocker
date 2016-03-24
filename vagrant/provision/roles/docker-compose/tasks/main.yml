@@ -1,0 +1,12 @@
+---
+
+- name: install docker-compose
+  become: yes
+  shell: curl -L https://github.com/docker/compose/releases/download/1.6.2/docker-compose-`uname -s`-`uname -m` > /usr/local/bin/docker-compose
+  args:
+    creates: /usr/local/bin/docker-compose
+
+- name: make docker-compose executable
+  become: yes
+  file: dest=/usr/local/bin/docker-compose mode=755
+

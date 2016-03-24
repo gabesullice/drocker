@@ -1,0 +1,112 @@
+#!/bin/bash
+
+set -e
+
+script_name=$0
+project_name=$(basename $PWD)
+drush_image=${drush_image:=gabesullice/drocker-drush}
+mysql_container=${mysql_container:=$(printf "%b%b" $project_name "_mysql_1")}
+drupal_container=${drupal_container:=$(printf "%b%b" $project_name "_drupal_1")}
+docker_network=${docker_network:=$(printf "%b%b" $project_name "_default")}
+
+drockervm_ip=192.168.33.33
+drocker_mount_dir=$HOME/drocker
+
+main () {
+  local subcmd=$1
+  local args=${@:2}
+
+  if [ $# -lt 1 ]; then
+    printf "You must provide at least one subcommand.\n"
+    subcmd="help"
+  fi
+
+  if [ "$subcmd" = "help" ]; then
+    local commands=( "init" "up" "down" "sql-import" "drush" "ssh" "connect" )
+    printf "Possible subcmds are:\n"
+    printf "\t%s\n" "${commands[@]}"
+    printf "For more information about these commands, see %b [SUBCMD] help.\n" $script_name
+    exit 1
+  fi
+
+  $subcmd $args
+}
+
+drush () {
+  local args=${@:1}
+
+  if [ "$1" = "help" ]; then
+    printf "Usage: %b %b [...drush args]\n" $script_name $FUNCNAME
+    printf "Use as you would regular drush. This command simply prefixes the drush command with the appropriate docker command.\n"
+    exit 0
+  fi
+
+  echo "docker run -i --volumes-from=$drupal_container --net=$docker_network $drush_image drush $args"
+  docker run -i --volumes-from=$drupal_container --net=$docker_network $drush_image drush $args
+}
+
+sql-import () {
+  if [ "$1" = "help" ]; then
+    printf "Usage: %b %b \e[4mFILE\e[0m\n" $script_name $FUNCNAME
+    printf "Imports the given SQL file into the running instance of drocker. Must not be gzipped.\n"
+    exit 0
+  fi
+  echo "docker run -i --volumes-from=$drupal_container --net=$docker_network $drush_image drush sql-cli < $1"
+  docker run -i --volumes-from=$drupal_container --net=$docker_network $drush_image drush sql-cli < $1
+}
+
+init () {
+  if [ "$1" = "help" ]; then
+    printf "Usage: %b %b\n" $script_name $FUNCNAME
+    printf "Brings up the drocker machine for the first time and creates a local directory to mount the drocker www directory into.\n"
+    exit 0
+  fi
+  echo "mkdir -p $drocker_mount_dir"
+  echo "cd vagrant && vagrant up && cd .."
+  mkdir -p $drocker_mount_dir
+  cd vagrant && vagrant up && cd ..
+}
+
+up () {
+  if [ "$1" = "help" ]; then
+    printf "Usage: %b %b\n" $script_name $FUNCNAME
+    printf "Brings up or reloads the drocker vagrant machine, then mounts the shared directory.\n"
+    exit 0
+  fi
+  echo "cd vagrant && vagrant reload && cd .."
+  echo "sudo mount -t nfs -o resvport,rw $drockervm_ip:/var/www $drocker_mount_dir"
+  cd vagrant && vagrant reload && cd ..
+  sudo mount -t nfs -o resvport,rw $drockervm_ip:/var/www $drocker_mount_dir
+}
+
+down () {
+  if [ "$1" = "help" ]; then
+    printf "Usage: %b %b\n" $script_name $FUNCNAME
+    printf "Suspends the drocker vagrant machine and unmounts the shared directory.\n"
+    exit 0
+  fi
+  echo "cd vagrant && vagrant suspend && cd .."
+  echo "sudo umount -l $drocker_mount_dir"
+  cd vagrant && vagrant suspend && cd ..
+  sudo umount -l $drocker_mount_dir
+}
+
+ssh () {
+  if [ "$1" = "help" ]; then
+    printf "Usage: %b %b\n" $script_name $FUNCNAME
+    printf "Starts an SSH session in the drocker vagrant machine.\n"
+    exit 0
+  fi
+  cd vagrant && vagrant ssh -c 'cd /var/www && /bin/bash -l' && cd ..
+}
+
+connect () {
+  if [ "$1" = "help" ]; then
+    printf "Usage: %b %b\n" $script_name $FUNCNAME
+    printf "Starts an SSH session in docker drush container.\n"
+    exit 0
+  fi
+  docker run --rm -it --volumes-from=$drupal_container --net=$docker_network $drush_image /bin/ash -l
+}
+
+main $@

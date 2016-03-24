@@ -1,0 +1,10 @@
+---
+
+- name: prefetch drocker containers
+  become: yes
+  command: docker pull {{ item }}
+  with_items:
+    - gabesullice/drocker-php-fpm
+    - gabesullice/drocker-nginx
+    - gabesullice/drocker-drush
+    - mysql

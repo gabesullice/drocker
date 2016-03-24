@@ -1,0 +1,25 @@
+---
+
+- name: install nfs packages
+  become: yes
+  apt: update_cache=yes name={{ item }} state=present
+  with_items:
+    - nfs-server
+    - nfs-common
+
+- name: ensure nfs is enabled and started
+  become: yes
+  service: name={{ item }} enabled=yes state=started
+  with_items:
+    - nfs-kernel-server
+
+- name: ensure www dir is present
+  become: yes
+  file: dest=/var/www state=directory owner=vagrant group=vagrant mode=0775
+
+- name: add nfs export
+  become: yes
+  lineinfile: line="/var/www *(rw,sync,all_squash,anonuid=1000,anongid=1000)" dest=/etc/exports
+  notify:
+    - restart nfs
+

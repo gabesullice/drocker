@@ -1,0 +1,25 @@
+---
+
+- name: install apt dependencies
+  become: yes
+  apt: name={{ item }} state=present
+  with_items:
+    - apt-transport-https
+
+- name: ensure docker apt-key is set up
+  become: yes
+  apt_key:
+    keyserver: "hkp://p80.pool.sks-keyservers.net:80"
+    id: "58118E89F3A912897C070ADBF76221572C52609D"
+
+- name: ensure docker repository is set present
+  become: yes
+  apt_repository:
+    repo: "deb https://apt.dockerproject.org/repo {{ ansible_distribution|lower }}-{{ ansible_distribution_release|lower }} main"
+    state: "present"
+
+- name: install docker packages
+  become: yes
+  apt: update_cache=yes name={{ item }} state=present
+  with_items:
+    - docker-engine

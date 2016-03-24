@@ -1,0 +1,27 @@
+version: '2'
+services:
+  drupal:
+    image: gabesullice/drocker-drupal-7
+    volumes:
+      - ./drupal/public_html:/var/www/html
+      - ./.data/drupal/files:/var/www/files
+      - ./.data/drupal/private:/var/www/private
+    links:
+      - mysql:mysql
+  nginx:
+    image: gabesullice/drocker-nginx
+    ports:
+      - 80:80
+    links:
+      - drupal:php-fpm
+    volumes_from:
+      - drupal:ro
+  mysql:
+    image: mysql
+    volumes:
+      - ./.data/mysql:/var/lib/mysql
+    environment:
+      - MYSQL_ROOT_PASSWORD=drocker
+      - MYSQL_DATABASE=drocker
+      - MYSQL_USER=drocker
+      - MYSQL_PASSWORD=drocker

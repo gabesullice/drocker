@@ -1,0 +1,6 @@
+---
+
+- include: docker.yml
+- include: nfs-server.yml
+- include: docker-compose.yml
+- include: drocker.yml
