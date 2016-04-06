@@ -4,7 +4,7 @@ set -e
 
 script_name=$0
 project_name=$(basename $PWD)
-drush_image=${drush_image:=gabesullice/drocker-drush}
+drupal_cli_image=${drupal_cli_image:=gabesullice/drocker-drupal-cli}
 mysql_container=${mysql_container:=$(printf "%b%b" $project_name "_mysql_1")}
 drupal_container=${drupal_container:=$(printf "%b%b" $project_name "_drupal_1")}
 docker_network=${docker_network:=$(printf "%b%b" $project_name "_default")}
@@ -41,8 +41,8 @@ drush () {
     exit 0
   fi
 
-  echo "docker run -i --volumes-from=$drupal_container --net=$docker_network $drush_image drush $args"
-  docker run -i --volumes-from=$drupal_container --net=$docker_network $drush_image drush $args
+  echo "docker run -i --volumes-from=$drupal_container --net=$docker_network $drupal_cli_image drush $args"
+  docker run -i --volumes-from=$drupal_container --net=$docker_network $drupal_cli_image drush $args
 }
 
 sql-import () {
@@ -51,8 +51,8 @@ sql-import () {
     printf "Imports the given SQL file into the running instance of drocker. Must not be gzipped.\n"
     exit 0
   fi
-  echo "docker run -i --volumes-from=$drupal_container --net=$docker_network $drush_image drush sql-cli < $1"
-  docker run -i --volumes-from=$drupal_container --net=$docker_network $drush_image drush sql-cli < $1
+  echo "docker run -i --volumes-from=$drupal_container --net=$docker_network $drupal_cli_image drush sql-cli < $1"
+  docker run -i --volumes-from=$drupal_container --net=$docker_network $drupal_cli_image drush sql-cli < $1
 }
 
 init () {
@@ -106,7 +106,7 @@ connect () {
     printf "Starts an SSH session in docker drush container.\n"
     exit 0
   fi
-  docker run --rm -it --volumes-from=$drupal_container --net=$docker_network $drush_image /bin/ash -l
+  docker run --rm -it --volumes-from=$drupal_container --net=$docker_network $drupal_cli_image /bin/ash -l
 }
 
 main $@
