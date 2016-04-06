@@ -22,7 +22,7 @@ main () {
   fi
 
   if [ "$subcmd" = "help" ]; then
-    local commands=( "init" "up" "down" "sql-import" "drush" "ssh" "connect" )
+    local commands=( "init" "up" "down" "sql-import" "drush" "shell" "ssh" "connect" )
     printf "Possible subcmds are:\n"
     printf "\t%s\n" "${commands[@]}"
     printf "For more information about these commands, see %b [SUBCMD] help.\n" $script_name
@@ -43,6 +43,19 @@ drush () {
 
   echo "docker run -i --volumes-from=$drupal_container --net=$docker_network $drupal_cli_image drush $args"
   docker run -i --volumes-from=$drupal_container --net=$docker_network $drupal_cli_image drush $args
+}
+
+shell () {
+  local args=${@:1}
+
+  if [ "$1" = "help" ]; then
+    printf "Usage: %b %b [shell command]\n" $script_name $FUNCNAME
+    printf "Run arbitrary commands in the drocker container. This command simply prefixes the your shell command with the appropriate docker command. You will need to escape any quotes with a \\.\n"
+    exit 0
+  fi
+
+  echo "docker run -i --volumes-from=$drupal_container --net=$docker_network $drupal_cli_image /bin/ash -c '$args'"
+  docker run -i --volumes-from=$drupal_container --net=$docker_network $drupal_cli_image /bin/ash -c "$args"
 }
 
 sql-import () {
