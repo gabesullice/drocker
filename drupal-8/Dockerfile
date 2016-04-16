@@ -9,3 +9,13 @@ RUN mkdir -p /opt/drupal \
     && chown -R root:www-data /var/www/html \
     && find /var/www/html -type f -exec chmod 744 {} \; \
     && find /var/www/html -type d -exec chmod 755 {} \;
+
+WORKDIR /var/www/html
+
+# Install composer
+ADD https://getcomposer.org/installer /tmp/composer-setup.php
+RUN php /tmp/composer-setup.php --filename=composer --install-dir=/usr/local/bin \
+    && rm /tmp/composer-setup.php
+
+# Update drupal packages
+RUN /usr/local/bin/composer update --no-dev -vvv
