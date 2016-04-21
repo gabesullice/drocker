@@ -3,7 +3,7 @@
 set -e
 
 script_name=$0
-project_name=$(basename $PWD)
+project_name=$(basename $PWD | sed 's/-//g' | sed 's/_//g')
 drupal_cli_image=${drupal_cli_image:=gabesullice/drocker-drupal-cli}
 mysql_container=${mysql_container:=$(printf "%b%b" $project_name "_mysql_1")}
 drupal_container=${drupal_container:=$(printf "%b%b" $project_name "_drupal_1")}
@@ -22,7 +22,7 @@ main () {
   fi
 
   if [ "$subcmd" = "help" ]; then
-    local commands=( "init" "up" "down" "sql-import" "drush" "shell" "ssh" "connect" )
+    local commands=( "init" "up" "down" "sql-import" "permissions" "drush" "shell" "ssh" "connect" )
     printf "Possible subcmds are:\n"
     printf "\t%s\n" "${commands[@]}"
     printf "For more information about these commands, see %b [SUBCMD] help.\n" $script_name
@@ -41,8 +41,8 @@ drush () {
     exit 0
   fi
 
-  echo "docker run -i --volumes-from=$drupal_container --net=$docker_network $drupal_cli_image drush $args"
-  docker run -i --volumes-from=$drupal_container --net=$docker_network $drupal_cli_image drush $args
+  echo "docker run --user=$(id -u) --rm -i --volumes-from=$drupal_container --net=$docker_network $drupal_cli_image drush $args"
+  docker run --user=$(id -u) --rm -i --volumes-from=$drupal_container --net=$docker_network $drupal_cli_image drush $args
 }
 
 shell () {
@@ -54,8 +54,8 @@ shell () {
     exit 0
   fi
 
-  echo "docker run -i --volumes-from=$drupal_container --net=$docker_network $drupal_cli_image /bin/ash -c '$args'"
-  docker run -i --volumes-from=$drupal_container --net=$docker_network $drupal_cli_image /bin/ash -c "$args"
+  echo "docker run --rm -i --volumes-from=$drupal_container --net=$docker_network $drupal_cli_image /bin/ash -c '$args'"
+  docker run --rm -i --volumes-from=$drupal_container --net=$docker_network $drupal_cli_image /bin/ash -c "$args"
 }
 
 sql-import () {
@@ -64,8 +64,46 @@ sql-import () {
     printf "Imports the given SQL file into the running instance of drocker. Must not be gzipped.\n"
     exit 0
   fi
-  echo "docker run -i --volumes-from=$drupal_container --net=$docker_network $drupal_cli_image drush sql-cli < $1"
-  docker run -i --volumes-from=$drupal_container --net=$docker_network $drupal_cli_image drush sql-cli < $1
+  echo "docker run --rm -i --volumes-from=$drupal_container --net=$docker_network $drupal_cli_image drush sql-cli < $1"
+  docker run --rm -i --volumes-from=$drupal_container --net=$docker_network $drupal_cli_image drush sql-cli < $1
+}
+
+permissions () {
+  local args=${@:1}
+
+  if [ "$1" = "help" ]; then
+    printf "Usage: %b %b\n" $script_name $FUNCNAME
+    printf "This will set permissions correctly for php-fpm and nginx within the docker container."
+    exit 0
+  fi
+
+  echo <<-EOF
+	docker run --rm -i --volumes-from=$drupal_container --net=$docker_network $drupal_cli_image /bin/ash -c "\
+	  mkdir -p /var/www/html /var/www/private /var/www/settings /var/www/files \
+	  && chown -R $(id -u):www-data /var/www/html /var/www/private /var/www/settings \
+	  && find /var/www/html -type d -exec chmod 755 {} \+ \
+	  && find /var/www/files -type d -exec chmod 775 {} \+ \
+	  && find /var/www/private -type d -exec chmod 775 {} \+ \
+	  && find /var/www/html -type f -exec chmod 744 {} \+ \
+	  && find /var/www/files -type f -exec chmod 764 {} \+ \
+	  && find /var/www/private -type f -exec chmod 764 {} \+ \
+	  && if [[ -e /var/www/html/sites/default/settings.php ]]; then chmod 644 /var/www/html/sites/default/settings.php; fi\
+	  && if [[ -e /var/www/html/sites/default/settings.local.php ]]; then chmod 644 /var/www/html/sites/default/settings.local.php; fi\
+	  && if [[ -e /var/www/html/sites/default/local-settings.inc ]]; then chmod 644 /var/www/html/sites/default/local-settings.inc; fi"
+	EOF
+
+  docker run --rm -i --volumes-from=$drupal_container --net=$docker_network $drupal_cli_image /bin/ash -c "\
+    mkdir -p /var/www/html /var/www/private /var/www/settings /var/www/files \
+    && chown -R $(id -u):www-data /var/www/html /var/www/private /var/www/settings \
+    && find /var/www/html -type d -exec chmod 755 {} \+ \
+    && find /var/www/files -type d -exec chmod 775 {} \+ \
+    && find /var/www/private -type d -exec chmod 775 {} \+ \
+    && find /var/www/html -type f -exec chmod 744 {} \+ \
+    && find /var/www/files -type f -exec chmod 764 {} \+ \
+    && find /var/www/private -type f -exec chmod 764 {} \+ \
+    && if [[ -e /var/www/html/sites/default/settings.php ]]; then chmod 644 /var/www/html/sites/default/settings.php; fi\
+    && if [[ -e /var/www/html/sites/default/settings.local.php ]]; then chmod 644 /var/www/html/sites/default/settings.local.php; fi\
+    && if [[ -e /var/www/html/sites/default/local-settings.inc ]]; then chmod 644 /var/www/html/sites/default/local-settings.inc; fi"
 }
 
 init () {
