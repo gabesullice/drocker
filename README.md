@@ -6,7 +6,11 @@ Drocker is a collection of command-line tools and Docker images for developing a
 Its philosophy is minimalistic and bare-bones. Drocker tries its best to get out of your way. Just making the tedious things simpler.
 
 ## Overview
-Drocker has three main components, a suite of base images, like nginx, php-fpm, and drocker-cli. These are configured to work in tandem and provide all the necessary dependencies for running Drupal. It then ships with two Drupal version dependent images, D7 and D8. These actually download and extract Drupal's source files into the container. Finally, Drocker has a command line tool, `drocker`. The CLI tool makes it easy to control the lifecycle of your local development, from running drush commands to spinning your containers up and down.
+Drocker has three main components. First, is a suite of base images, like nginx, php-fpm, etc. All of Drocker's images are single-process containers, no supervisord funny-business. This choice allows you to orchestrate things however you choose. Although, for local orchestration we encourage you to use `docker-compose`. Drocker has no opinion on how you should orchestrate your containers in production.
+
+Second, Drocker ships with two Drupal specific images (built off the php-fpm base image). The intent here is to allow you to create Dockerfiles from these images, installing only your custom code and modifications. By doing so, you can easily "inherit" updates from the Drupal and php-fpm images.
+
+Finally, Drocker ships with a command line tool (rather unoriginally named `drocker`). This tool makes it easy to control the lifecycle of your local development, from running drush commands, importing databases, to fixing permissions issues.
 
 ## Quickstart
 If you already have docker and docker-compose installed, you can follow these steps to get up and running:
