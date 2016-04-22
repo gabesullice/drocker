@@ -4,15 +4,23 @@ set -e
 
 main () {
   get_makefile
-  get_drupal_version
-  make init
+  local drupal_version=$(get_drupal_version)
+  initialize $drupal_version
+  cleanup
+}
+
+initialize () {
+  DOCKER_VERSION=$1 make init
+}
+
+cleanup () {
+  rm ./Makefile
 }
 
 get_drupal_version () {
   read -p "Which version of Drupal will this be for? [8]: " DRUPAL_VERSION
-  if ![[ $DRUPAL_VERSION ]]; then DRUPAL_VERSION=8; fi
-  export DRUPAL_VERSION
   printf "\n"
+  echo ${DRUPAL_VERSION:="8"}
 }
 
 get_makefile () {
