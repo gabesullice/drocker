@@ -1,7 +1,9 @@
 Drocker
 ----
 
-Drocker is a collection of CLI tools and Docker images for developing and running containerized Drupal sites.
+Drocker is a collection of command-line tools and Docker images for developing and running containerized Drupal sites.
+
+Its philosophy is minimalistic and bare-bones. Drocker tries its best to get out of your way. Just making the tedious things simpler.
 
 ## Overview
 Drocker has three main components, a suite of base images, like nginx, php-fpm, and drocker-cli. These are configured to work in tandem and provide all the necessary dependencies for running Drupal. It then ships with two Drupal version dependent images, D7 and D8. These actually download and extract Drupal's source files into the container. Finally, Drocker has a command line tool, `drocker`. The CLI tool makes it easy to control the lifecycle of your local development, from running drush commands to spinning your containers up and down.
