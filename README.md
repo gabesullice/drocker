@@ -46,7 +46,7 @@ curl -sS -Lo ./install.sh https://raw.githubusercontent.com/gabesullice/drocker/
 git clone <your git upstream> ./docroot
 ```
 
-From here, you will have a basic Dockerfile and docker-compose.yml ready to go. You can make any modifications you need for your project in those, like extra shared volumes overwriting `robots.txt`, etc.
+From here, you will have a basic Dockerfile and docker-compose.yml ready to go. You can make any modifications you need for your project in those, like extra shared volumes, overwriting `robots.txt`, etc.
 
 Now, run `docker-compose build` to check that your Dockerfile builds correctly. If so, run `docker-compose up -d`. If all goes well, you can move on to the final step.
 
