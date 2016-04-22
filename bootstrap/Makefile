@@ -10,13 +10,13 @@ deinit:
 	rm ./.dockerignore
 
 Dockerfile:
-	cp ./vendor/drocker/bootstrap/docker-compose.yml.example ./docker-compose.yml
+	cp ./vendor/drocker/bootstrap/Dockerfile.d$(DRUPAL_VERSION).example ./Dockerfile
 
 .dockerignore:
 	cp ./vendor/drocker/bootstrap/.dockerignore.example ./.dockerignore
 
 docker-compose.yml: upstream
-	cp ./vendor/drocker/bootstrap/docker-compose.yml.example ./docker-compose.yml
+	cp ./vendor/drocker/bootstrap/docker-compose.yml.d$(DRUPAL_VERSION).example ./docker-compose.yml
 
 drocker: upstream
 	ln -sf ./vendor/drocker/command/drocker ./drocker
