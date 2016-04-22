@@ -1,0 +1,21 @@
+FROM gabesullice/drocker-drupal-8
+
+# Add src files
+COPY docroot/modules /var/www/html/modules
+COPY docroot/themes /var/www/html/themes
+COPY docroot/private/config /var/www/html/private/config
+COPY docroot/sites/default/settings.php /var/www/html/sites/default/settings.php
+
+RUN /usr/local/bin/php /var/www/html/modules/contrib/composer_manager/scripts/init.php \
+      && /usr/local/bin/composer drupal-update --no-dev -vvv
+
+RUN chown -R root:www-data /var/www/html \
+      && find . -type d -exec chmod 775 {} \; \
+      && find . -type f -exec chmod 644 {} \; \
+      && chmod 755 /var/www/html/sites/default \
+      && chmod 644 /var/www/html/sites/default/settings.php
+
+RUN ln -sf /var/www/settings/settings.local.php /var/www/html/sites/default/settings.local.php
+RUN ln -sf /var/www/files /var/www/html/sites/default/files
+
+VOLUME /var/www/html
