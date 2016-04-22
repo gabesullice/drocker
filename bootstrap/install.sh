@@ -16,7 +16,7 @@ get_drupal_version () {
 }
 
 get_makefile () {
-  curl -Lo ./Makefile https://raw.githubusercontent.com/gabesullice/drocker/master/bootstrap/Makefile
+  curl -sS -Lo ./Makefile https://raw.githubusercontent.com/gabesullice/drocker/master/bootstrap/Makefile
 }
 
 main $@
