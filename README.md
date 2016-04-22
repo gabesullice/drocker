@@ -6,6 +6,25 @@ Drocker is a collection of CLI tools and Docker images for developing and runnin
 ## Overview
 Drocker has three main components, a suite of base images, like nginx, php-fpm, and drocker-cli. These are configured to work in tandem and provide all the necessary dependencies for running Drupal. It then ships with two Drupal version dependent images, D7 and D8. These actually download and extract Drupal's source files into the container. Finally, Drocker has a command line tool, `drocker`. The CLI tool makes it easy to control the lifecycle of your local development, from running drush commands to spinning your containers up and down.
 
+## Quickstart
+If you already have docker and docker-compose installed, you can follow these steps to get up and running:
+
+```sh
+# Create a directory for you project
+mkdir mynewproject
+cd mynewproject
+
+# Download and install configuration files.
+curl -sS -Lo ./install.sh https://raw.githubusercontent.com/gabesullice/drocker/master/bootstrap/install.sh \
+  && chmod u+x ./install.sh \
+  && ./install.sh \
+  && rm ./install.sh
+# The above will prompt you for a drupal version, either "7" or "8".
+
+# Now that you have the skeleton, go ahead and put the Drupal root in a subdirectory named "docroot".
+git clone <your git upstream> ./docroot
+```
+
 ## Running on Linux
 All you need to run Drocker instances on Linux is have the docker-engine and docker compose installed.
 
