@@ -1,13 +1,12 @@
 version: '2'
 services:
   drupal:
-    image: gabesullice/drocker-drupal-7
+    build: .
     volumes:
-      - ./drupal/public_html:/var/www/html
+      - ./docroot/sites/all:/var/www/html/sites/all
       - ./.data/drupal/files:/var/www/files
       - ./.data/drupal/private:/var/www/private
-    links:
-      - mysql:mysql
+      - ./.data/drupal/settings:/var/www/settings
   nginx:
     image: gabesullice/drocker-nginx
     ports:
