@@ -3,11 +3,11 @@ DROCKER_UPSTREAM=git@github.com:gabesullice/drocker.git
 init: docker-compose.yml drocker Dockerfile .dockerignore
 
 deinit:
-	rm -rf ./vendor/drocker
-	rm ./drocker
-	rm ./docker-compose.yml
-	rm ./Dockerfile
-	rm ./.dockerignore
+	- rm -rf ./vendor
+	- rm ./drocker
+	- rm ./docker-compose.yml
+	- rm ./Dockerfile
+	- rm ./.dockerignore
 
 Dockerfile:
 	cp ./vendor/drocker/bootstrap/Dockerfile.d$(DRUPAL_VERSION).example ./Dockerfile
