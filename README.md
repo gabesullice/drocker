@@ -11,6 +11,22 @@ Second, Drocker ships with two Drupal specific images (built off the php-fpm bas
 
 Finally, Drocker ships with a command line tool (rather unoriginally named `drocker`). This tool makes it easy to control the lifecycle of your local development, from running drush commands, importing databases, to fixing permissions issues.
 
+## Anti-Features
+As is mentioned above, Drocker tries to be minimalistic and get out of your way. That means that there are some things that we just won't try to do for you. That said, most, if not all the features an opinionated VM might give you are completely possible to achieve and we have a Wiki to show you how to do those things yourself.
+
+- PimpMyLog
+  - We prefer `tail -f` _et al._ for streaming logs.
+- Node.js
+  - Build a Dockerfile for your node project or use someones prebuilt image; add it to your `docker-compose.yml`
+- MailCatcher/MailHog
+  - Just add a container with one of these already installed to your `docker-compose.yml` file.
+- PhpMySQL/Adminer
+  - See above.
+- Redis
+  - See above.
+- Ruby
+  - Ick.
+
 ## Setting Up a Project
 If you already have docker and docker-compose installed, you can follow these steps to get up and running:
 
