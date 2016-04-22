@@ -10,7 +10,7 @@ main () {
 }
 
 initialize () {
-  DOCKER_VERSION=$1 make init
+  DRUPAL_VERSION=$1 make init
 }
 
 cleanup () {
