@@ -19,7 +19,7 @@ main () {
   fi
 
   if [ "$subcmd" = "help" ]; then
-    local commands=( "sql-import" "permissions" "drush" "shell" "connect" )
+    local commands=( "sql-import" "permissions" "drush" "sqlc" "shell" "connect" )
     printf "Possible subcmds are:\n"
     printf "\t%s\n" "${commands[@]}"
     printf "For more information about these commands, see %b [SUBCMD] help.\n" $script_name
@@ -41,6 +41,20 @@ drush () {
   log "docker run --user=$(id -u) --rm -i --volumes-from=$drupal_container --net=$docker_network $drupal_cli_image drush $args"
 
   docker run --user=$(id -u) --rm -i --volumes-from=$drupal_container --net=$docker_network $drupal_cli_image drush $args
+}
+
+sqlc () {
+  local args=${@:1}
+
+  if [ "$1" = "help" ]; then
+    printf "Usage: %b %b\n" $script_name $FUNCNAME
+    printf "Use as you would drush sqlc.\n"
+    exit 0
+  fi
+
+  log "docker exec --user=$(id -u) -it $mysql_container /bin/bash -c 'mysql -A -u \$MYSQL_USER -p\$MYSQL_PASSWORD \$MYSQL_DATABASE'"
+
+  docker exec --user=$(id -u) -it $mysql_container /bin/bash -c 'mysql -A -u $MYSQL_USER -p$MYSQL_PASSWORD $MYSQL_DATABASE'
 }
 
 shell () {
