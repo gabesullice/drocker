@@ -102,6 +102,7 @@ permissions () {
     && find /var/www/files -type f -exec chmod 764 {} \+ \
     && find /var/www/private -type f -exec chmod 764 {} \+ \
     && if [[ -e /var/www/html/sites/default/settings.php ]]; then chmod 644 /var/www/html/sites/default/settings.php; fi\
+    && if [[ -e /var/www/html/sites/default/services.yml ]]; then chmod 644 /var/www/html/sites/default/services.yml; fi\
     && if [[ -e /var/www/html/sites/default/settings.local.php ]]; then chmod 644 /var/www/html/sites/default/settings.local.php; fi\
     && if [[ -e /var/www/html/sites/default/local-settings.inc ]]; then chmod 644 /var/www/html/sites/default/local-settings.inc; fi"
 }
