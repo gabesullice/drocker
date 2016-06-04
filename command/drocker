@@ -26,7 +26,30 @@ main () {
     exit 1
   fi
 
+  configure
+
   $subcmd $args
+}
+
+configure () {
+  local arg=$1
+
+  if [ "$1" = "help" ]; then
+    printf "Usage: %b %b [\e[4mENVIRONMENT FILE\e[0m]\n" $script_name $FUNCNAME
+    printf "Overrides drocker's configuration with the environment variables in \e[4mENVIRONMENT FILE\e[0m. If no argument is passed, the default is ./.drocker.\n"
+    exit 0
+  fi
+
+  local config_file=${arg:=$PWD/.drocker}
+
+  if [[ -f $config_file ]]; then
+    source $config_file
+    project_name=$(basename $PWD | sed 's/-//g' | sed 's/_//g')
+    drupal_cli_image=${DROCKER_CLI_IMAGE:=$drupal_cli_image}
+    mysql_container=${DROCKER_MYSQL_CONTAINER:=$(printf "%b%b" $project_name "_mysql_1")}
+    drupal_container=${DROCKER_DRUPAL_CONTAINER:=$(printf "%b%b" $project_name "_drupal_1")}
+    docker_network=${DROCKER_DOCKER_NETWORK:=$(printf "%b%b" $project_name "_default")}
+  fi
 }
 
 drush () {
