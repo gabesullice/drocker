@@ -3,11 +3,13 @@
 set -e
 
 script_name=$0
+
+# Define container and networking defaults
 project_name=$(basename $PWD | sed 's/-//g' | sed 's/_//g')
-drupal_cli_image=${DROCKER_CLI_IMAGE:=gabesullice/drocker-drupal-cli}
-mysql_container=${DROCKER_MYSQL_CONTAINER:=$(printf "%b%b" $project_name "_mysql_1")}
-drupal_container=${DROCKER_DRUPAL_CONTAINER:=$(printf "%b%b" $project_name "_drupal_1")}
-docker_network=${DROCKER_DOCKER_NETWORK:=$(printf "%b%b" $project_name "_default")}
+drupal_cli_image=gabesullice/drocker-drupal-cli
+mysql_container=$(printf "%b%b" $project_name "_mysql_1")
+drupal_container=$(printf "%b%b" $project_name "_drupal_1")
+docker_network=$(printf "%b%b" $project_name "_default")
 
 main () {
   local subcmd=$1
@@ -40,15 +42,15 @@ configure () {
     exit 0
   fi
 
-  local config_file=${arg:=$PWD/.drocker}
+  local config_file=$(find_config)
 
   if [[ -f $config_file ]]; then
     source $config_file
-    project_name=$(basename $PWD | sed 's/-//g' | sed 's/_//g')
+    project_name=${DROCKER_PROJECT_NAME:=$project_name}
     drupal_cli_image=${DROCKER_CLI_IMAGE:=$drupal_cli_image}
-    mysql_container=${DROCKER_MYSQL_CONTAINER:=$(printf "%b%b" $project_name "_mysql_1")}
-    drupal_container=${DROCKER_DRUPAL_CONTAINER:=$(printf "%b%b" $project_name "_drupal_1")}
-    docker_network=${DROCKER_DOCKER_NETWORK:=$(printf "%b%b" $project_name "_default")}
+    mysql_container=${DROCKER_MYSQL_CONTAINER:=$mysql_container}
+    drupal_container=${DROCKER_DRUPAL_CONTAINER:=$drupal_container}
+    docker_network=${DROCKER_DOCKER_NETWORK:=$docker_network}
   fi
 }
 
@@ -138,6 +140,26 @@ connect () {
   log "docker run --rm -it --volumes-from=$drupal_container --net=$docker_network $drupal_cli_image /bin/ash -l"
 
   docker run --rm -it --volumes-from=$drupal_container --net=$docker_network $drupal_cli_image /bin/ash -l
+}
+
+find_config () {
+  local cwd=$(pwd)
+  local config_file=""
+
+  while [[ $cwd != "/" ]]; do
+    if [[ -e $cwd/.drocker ]]; then
+      config_file=$cwd/.drocker
+      break
+    fi
+    cwd=$(dirname $cwd)
+  done;
+
+  if [[ -z $config_file ]]; then
+    log "Could not locate a .drocker config file."
+    exit 1
+  else
+    echo $config_file
+  fi
 }
 
 log () {
