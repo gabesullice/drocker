@@ -2,7 +2,7 @@
 
 set -e
 
-script_name=$0
+script_name=$(basename $0)
 
 # Define container and networking defaults
 project_name=$(basename $PWD | sed 's/-//g' | sed 's/_//g')
@@ -16,7 +16,7 @@ main () {
   local args=${@:2}
 
   if [ $# -lt 1 ]; then
-    printf "You must provide at least one subcommand.\n"
+    error "You must provide at least one subcommand. See \`$script_name help\` for more info."
     subcmd="help"
   fi
 
@@ -155,7 +155,7 @@ find_config () {
   done;
 
   if [[ -z $config_file ]]; then
-    log "Could not locate a .drocker config file."
+    error "Could not locate a .drocker config file. Falling back to defaults..."
     exit 1
   else
     echo $config_file
@@ -164,6 +164,10 @@ find_config () {
 
 log () {
   (>&2 echo "$1")
+}
+
+error () {
+  (>&2 echo -e "\e[31m$1\e[0m")
 }
 
 main $@
