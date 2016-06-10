@@ -1,6 +1,6 @@
 FROM gabesullice/drocker-php-fpm
 
-ADD https://ftp.drupal.org/files/projects/drupal-8.0.6.tar.gz /opt/drupal.tar.gz
+ADD https://ftp.drupal.org/files/projects/drupal-8.1.2.tar.gz /opt/drupal.tar.gz
 
 RUN mkdir -p /opt/drupal \
     && tar -xvz -C /opt/drupal -f /opt/drupal.tar.gz \
