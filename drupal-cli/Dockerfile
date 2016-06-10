@@ -23,4 +23,9 @@ RUN php /tmp/drupal.phar \
     && drupal init --override \
     && sed -i /mysql/d /root/.console/phpcheck.yml
 
+# Install drupal code sniffers
+RUN composer global require drupal/coder \
+  && /bin/sh -c 'printf "export PATH=$PATH:/root/.composer/vendor/bin" >> /root/.profile'
+RUN /root/.composer/vendor/bin/phpcs --config-set installed_paths /root/.composer/vendor/drupal/coder/coder_sniffer
+
 WORKDIR /var/www/html
