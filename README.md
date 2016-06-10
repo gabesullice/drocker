@@ -42,8 +42,11 @@ curl -sS -Lo ./install.sh https://raw.githubusercontent.com/gabesullice/drocker/
   && rm ./install.sh
 # The above will prompt you for a drupal version, either "7" or "8".
 
-# Now that you have the skeleton, go ahead and put the Drupal root in a subdirectory named "docroot".
+# Now that you have the skeleton, you need a Drupal root in a subdirectory named "docroot" (this is configurable).
+# For an existing project:
 git clone <your git upstream> ./docroot
+# For a new project:
+drush dl --drupal-project-rename=docroot drupal
 ```
 
 From here, you will have a basic Dockerfile and docker-compose.yml ready to go. You can make any modifications you need for your project in those, like extra shared volumes, overwriting `robots.txt`, etc.
