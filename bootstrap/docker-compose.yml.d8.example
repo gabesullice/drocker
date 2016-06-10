@@ -1,29 +1,30 @@
 version: '2'
 services:
   drupal:
-    build: .
+    build:
+      context: .
+      dockerfile: Dockerfile.development
     volumes:
-      - ./docroot/modules:/var/www/html/modules
-      - ./docroot/modules:/var/www/html/themes
       - ./.data/drupal/files:/var/www/files
-      - ./.data/drupal/private:/var/www/private
       - ./.data/drupal/settings:/var/www/settings
+      - ./.data/drupal/private:/var/www/private
+      - ./public_html/modules:/var/www/html/modules
+      - ./public_html/themes:/var/www/html/themes
+      - ./config:/var/www/config
   nginx:
     image: gabesullice/drocker-nginx
+    ports:
+      - 80:80
     links:
       - drupal:php-fpm
     volumes_from:
       - drupal:ro
-    volumes:
-      - ./.data/drupal/files:/var/www/html/sites/default/files
-    ports:
-      - 80:80
   mysql:
     image: mysql
     volumes:
       - ./.data/mysql:/var/lib/mysql
     environment:
-      - MYSQL_ALLOW_EMPTY_PASSWORD=yes
+      - MYSQL_ROOT_PASSWORD=drocker
       - MYSQL_DATABASE=drocker
       - MYSQL_USER=drocker
       - MYSQL_PASSWORD=drocker
