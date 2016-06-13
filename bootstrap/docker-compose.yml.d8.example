@@ -8,8 +8,8 @@ services:
       - ./.data/drupal/files:/var/www/files
       - ./.data/drupal/settings:/var/www/settings
       - ./.data/drupal/private:/var/www/private
-      - ./public_html/modules:/var/www/html/modules
-      - ./public_html/themes:/var/www/html/themes
+      - ./docroot/modules:/var/www/html/modules
+      - ./docroot/themes:/var/www/html/themes
       - ./config:/var/www/config
   nginx:
     image: gabesullice/drocker-nginx
