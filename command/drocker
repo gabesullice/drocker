@@ -176,8 +176,8 @@ bootstrap () {
   local drupal_root=./docroot
   local default_dir=$drupal_root/sites/default
 
-  if [[ ! -e ./docroot ]]; then drush dl --drupal-project-rename=docroot drupal; fi
-  if [[ ! -e $default_dir/settings.php ]]; then $default_dir/default.settings.php $default_dir/settings.php; fi
+  if [[ ! -e ./docroot ]]; then $(which drush) dl --drupal-project-rename=docroot drupal; fi
+  if [[ ! -e $default_dir/settings.php ]]; then cp $default_dir/default.settings.php $default_dir/settings.php; fi
 
   docker-compose up -d
   install-prepare
