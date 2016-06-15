@@ -21,7 +21,7 @@ main () {
   fi
 
   if [ "$subcmd" = "help" ]; then
-    local commands=( "connect" "drush" "install-prepare" "permissions" "shell" "sqlc" "sql-import" )
+    local commands=( "bootstrap" "connect" "drush" "install-prepare" "permissions" "shell" "sqlc" "sql-import" )
     printf "Possible subcmds are:\n"
     printf "\t%s\n" "${commands[@]}"
     printf "For more information about these commands, see %b [SUBCMD] help.\n" $script_name
@@ -164,6 +164,23 @@ configure () {
     drupal_container=${DROCKER_DRUPAL_CONTAINER:=$drupal_container}
     docker_network=${DROCKER_DOCKER_NETWORK:=$docker_network}
   fi
+}
+
+bootstrap () {
+  if [ "$1" = "help" ]; then
+    printf "Usage: %b %b\n" $script_name $FUNCNAME
+    printf "Bootstraps a new drocker project."
+    exit 0
+  fi
+
+  local drupal_root=./docroot
+  local default_dir=$drupal_root/sites/default
+
+  if [[ ! -e ./docroot ]]; then drush dl --drupal-project-rename=docroot drupal; fi
+  if [[ ! -e $default_dir/settings.php ]]; then $default_dir/default.settings.php $default_dir/settings.php; fi
+
+  docker-compose up -d
+  install-prepare
 }
 
 find_config () {
