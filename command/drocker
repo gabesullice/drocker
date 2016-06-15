@@ -21,7 +21,7 @@ main () {
   fi
 
   if [ "$subcmd" = "help" ]; then
-    local commands=( "bootstrap" "connect" "drush" "install-prepare" "permissions" "shell" "sqlc" "sql-import" )
+    local commands=( "bootstrap" "connect" "down" "drush" "install-prepare" "permissions" "shell" "sqlc" "sql-import" "up" )
     printf "Possible subcmds are:\n"
     printf "\t%s\n" "${commands[@]}"
     printf "For more information about these commands, see %b [SUBCMD] help.\n" $script_name
@@ -31,6 +31,28 @@ main () {
   configure
 
   $subcmd $args
+}
+
+up () {
+  if [ "$1" = "help" ]; then
+    printf "Usage: %b %b\n" $script_name $FUNCNAME
+    printf "Alias for \`docker-compose up -d\`"
+    exit 0
+  fi
+
+  log "docker-compose up -d"
+  docker-compose up -d
+}
+
+down () {
+  if [ "$1" = "help" ]; then
+    printf "Usage: %b %b\n" $script_name $FUNCNAME
+    printf "Alias for \`docker-compose down\`"
+    exit 0
+  fi
+
+  log "docker-compose down"
+  docker-compose down
 }
 
 drush () {
