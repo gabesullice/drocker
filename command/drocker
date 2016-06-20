@@ -10,6 +10,7 @@ drupal_cli_image=gabesullice/drocker-drupal-cli
 mysql_container=$(printf "%b%b" $project_name "_mysql_1")
 drupal_container=$(printf "%b%b" $project_name "_drupal_1")
 docker_network=$(printf "%b%b" $project_name "_default")
+drocker_env_files=""
 
 main () {
   local subcmd=$1
@@ -64,9 +65,9 @@ drush () {
     exit 0
   fi
 
-  log "docker run --user=$(id -u) --rm -i --volumes-from=$drupal_container --net=$docker_network $drupal_cli_image drush $args"
+  log "docker run --user=$(id -u) --rm -i $drocker_env_files --volumes-from=$drupal_container --net=$docker_network $drupal_cli_image drush $args"
 
-  docker run --user=$(id -u) --rm -i --volumes-from=$drupal_container --net=$docker_network $drupal_cli_image drush $args
+  docker run --user=$(id -u) --rm -i $drocker_env_files --volumes-from=$drupal_container --net=$docker_network $drupal_cli_image drush $args
 }
 
 sqlc () {
@@ -78,9 +79,9 @@ sqlc () {
     exit 0
   fi
 
-  log "docker exec --user=$(id -u) -it $mysql_container /bin/bash -c 'mysql -A -u \$MYSQL_USER -p\$MYSQL_PASSWORD \$MYSQL_DATABASE'"
+  log "docker exec --user=$(id -u) -it $drocker_env_files $mysql_container /bin/bash -c 'mysql -A -u \$MYSQL_USER -p\$MYSQL_PASSWORD \$MYSQL_DATABASE'"
 
-  docker exec --user=$(id -u) -it $mysql_container /bin/bash -c 'mysql -A -u $MYSQL_USER -p$MYSQL_PASSWORD $MYSQL_DATABASE'
+  docker exec --user=$(id -u) -it $drocker_env_files $mysql_container /bin/bash -c 'mysql -A -u $MYSQL_USER -p$MYSQL_PASSWORD $MYSQL_DATABASE'
 }
 
 shell () {
@@ -92,9 +93,9 @@ shell () {
     exit 0
   fi
 
-  log "docker run --rm -i --volumes-from=$drupal_container --net=$docker_network $drupal_cli_image /bin/ash -c '$args'"
+  log "docker run --rm -i $drocker_env_files --volumes-from=$drupal_container --net=$docker_network $drupal_cli_image /bin/ash -c '$args'"
 
-  docker run --rm -i --volumes-from=$drupal_container --net=$docker_network $drupal_cli_image /bin/ash -c "$args"
+  docker run --rm -i $drocker_env_files --volumes-from=$drupal_container --net=$docker_network $drupal_cli_image /bin/ash -c "$args"
 }
 
 sql-import () {
@@ -104,9 +105,9 @@ sql-import () {
     exit 0
   fi
 
-  log "docker run --rm -i --volumes-from=$drupal_container --net=$docker_network $drupal_cli_image drush sql-cli < $1"
+  log "docker run --rm -i $drocker_env_files --volumes-from=$drupal_container --net=$docker_network $drupal_cli_image drush sql-cli < $1"
 
-  docker run --rm -i --volumes-from=$drupal_container --net=$docker_network $drupal_cli_image drush sql-cli < $1
+  docker run --rm -i $drocker_env_files --volumes-from=$drupal_container --net=$docker_network $drupal_cli_image drush sql-cli < $1
 }
 
 install-prepare () {
@@ -119,7 +120,7 @@ install-prepare () {
   fi
 
   permissions \
-  && docker run --rm -i --volumes-from=$drupal_container --net=$docker_network $drupal_cli_image /bin/ash -c "\
+  && docker run --rm -i $drocker_env_files --volumes-from=$drupal_container --net=$docker_network $drupal_cli_image /bin/ash -c "\
     ln -sf /var/www/files /var/www/html/sites/default/files \
     && settingsFile=/var/www/html/sites/default/settings.php \
       && if [[ ! -e \$settingsFile ]]; then \
@@ -142,7 +143,7 @@ permissions () {
     exit 0
   fi
 
-  docker run --rm -i --volumes-from=$drupal_container --net=$docker_network $drupal_cli_image /bin/ash -c "\
+  docker run --rm -i $drocker_env_files --volumes-from=$drupal_container --net=$docker_network $drupal_cli_image /bin/ash -c "\
     mkdir -p /var/www/html /var/www/private /var/www/settings /var/www/files /var/www/config \
     && chown -R $(id -u):www-data /var/www/html /var/www/private /var/www/settings /var/www/files /var/www/config \
     && find /var/www/html /var/www/settings -type d -exec chmod 755 {} \+ \
@@ -162,9 +163,9 @@ connect () {
     exit 0
   fi
 
-  log "docker run --rm -it --volumes-from=$drupal_container --net=$docker_network $drupal_cli_image /bin/ash -l"
+  log "docker run --rm -it $drocker_env_files --volumes-from=$drupal_container --net=$docker_network $drupal_cli_image /bin/ash -l"
 
-  docker run --rm -it --volumes-from=$drupal_container --net=$docker_network $drupal_cli_image /bin/ash -l
+  docker run --rm -it $drocker_env_files --volumes-from=$drupal_container --net=$docker_network $drupal_cli_image /bin/ash -l
 }
 
 configure () {
@@ -185,6 +186,7 @@ configure () {
     mysql_container=${DROCKER_MYSQL_CONTAINER:=$mysql_container}
     drupal_container=${DROCKER_DRUPAL_CONTAINER:=$drupal_container}
     docker_network=${DROCKER_DOCKER_NETWORK:=$docker_network}
+    drocker_env_files=${DROCKER_ENV_FILES:=$drocker_env_files}
   fi
 }
 
