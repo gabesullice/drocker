@@ -7,6 +7,7 @@ COPY ./docroot/sites/default/settings.php /var/www/html/sites/default/settings.p
 
 COPY ./docroot/themes /var/www/html/themes
 COPY ./docroot/modules /var/www/html/modules
+COPY ./config /var/www/config
 
 VOLUME /var/www/html
 VOLUME /var/www/files
