@@ -22,7 +22,7 @@ main () {
   fi
 
   if [ "$subcmd" = "help" ]; then
-    local commands=( "bootstrap" "connect" "down" "drush" "install-prepare" "permissions" "shell" "sqlc" "sql-import" "up" )
+    local commands=( "bootstrap" "connect" "down" "drush" "errors" "install-prepare" "permissions" "shell" "sqlc" "sql-import" "up" )
     printf "Possible subcmds are:\n"
     printf "\t%s\n" "${commands[@]}"
     printf "For more information about these commands, see %b [SUBCMD] help.\n" $script_name
@@ -68,6 +68,20 @@ drush () {
   log "docker run --user=$(id -u) --rm -i $drocker_env_files --volumes-from=$drupal_container --net=$docker_network $drupal_cli_image drush $args"
 
   docker run --user=$(id -u) --rm -i $drocker_env_files --volumes-from=$drupal_container --net=$docker_network $drupal_cli_image drush $args
+}
+
+errors () {
+  local args=${@:1}
+
+  if [ "$1" = "help" ]; then
+    printf "Usage: %b %b\n" $script_name $FUNCNAME
+    printf "Streams drupal watchdog errors. Same as \`drush watchdog-show --tail\`.\n"
+    exit 0
+  fi
+
+  log "docker run --user=$(id -u) --rm -it $drocker_env_files --volumes-from=$drupal_container --net=$docker_network $drupal_cli_image /bin/ash -c 'drush ws --tail'"
+
+  docker run --user=$(id -u) --rm -it $drocker_env_files --volumes-from=$drupal_container --net=$docker_network $drupal_cli_image /bin/ash -c 'drush ws --tail'
 }
 
 sqlc () {
