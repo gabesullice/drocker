@@ -1,6 +1,6 @@
 <?php
 
-$settings['hash_salt'] = file_get_contents('/var/www/private/hash_salt');
+$settings['hash_salt'] = file_get_contents('/var/www/private/hash_salt.txt');
 $config_directories['sync'] = '/var/www/config/sync';
 
 // You may uncomment this once you have a database installed.
