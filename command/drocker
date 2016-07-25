@@ -43,7 +43,7 @@ remote () {
 
   local remote_host=$1
 
-  ssh $remote_host /bin/bash -s ${@:2} < $0
+  ssh -A $remote_host /bin/bash -s ${@:2} < $0
 }
 
 up () {
