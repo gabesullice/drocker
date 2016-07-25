@@ -37,7 +37,9 @@ main () {
 remote () {
   if [ "$1" = "help" ]; then
     printf "Usage: %b %b \e[4mHOST\e[0m [...command]\n" $script_name $FUNCNAME
-    printf "Executes the drocker command on the remote host provided. E.g. drocker remote sshuser@some.domain drush uli\n"
+    printf "Executes the drocker command on the remote host provided.\n"
+    printf "Please note that interactive commands like \`connect\` and \`sqlc\` do not work in remote mode.\n"
+    printf "Example: %b %b sshuser@some.domain drush uli\n" $script_name $FUNCNAME
     exit 0
   fi
 
@@ -105,9 +107,9 @@ sqlc () {
     exit 0
   fi
 
-  log "docker exec --user=$(id -u) -it $drocker_env_files $mysql_container /bin/bash -c 'mysql -A -u \$MYSQL_USER -p\$MYSQL_PASSWORD \$MYSQL_DATABASE'"
+  log "docker exec --user=$(id -u) -it $mysql_container /bin/bash -c 'mysql -A -u \$MYSQL_USER -p\$MYSQL_PASSWORD \$MYSQL_DATABASE'"
 
-  docker exec --user=$(id -u) -it $drocker_env_files $mysql_container /bin/bash -c 'mysql -A -u $MYSQL_USER -p$MYSQL_PASSWORD $MYSQL_DATABASE'
+  docker exec --user=$(id -u) -it $mysql_container /bin/bash -c 'mysql -A -u $MYSQL_USER -p$MYSQL_PASSWORD $MYSQL_DATABASE'
 }
 
 shell () {
