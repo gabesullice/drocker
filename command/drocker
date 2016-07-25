@@ -37,7 +37,7 @@ main () {
 remote () {
   if [ "$1" = "help" ]; then
     printf "Usage: %b %b \e[4mHOST\e[0m [...command]\n" $script_name $FUNCNAME
-    printf "Executes the drocker command on the remote host provided. E.g. drocker remote sshuser@some.domain drush st"
+    printf "Executes the drocker command on the remote host provided. E.g. drocker remote sshuser@some.domain drush uli\n"
     exit 0
   fi
 
