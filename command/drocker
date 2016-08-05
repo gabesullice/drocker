@@ -55,8 +55,8 @@ up () {
     exit 0
   fi
 
-  log "docker-compose up -d"
-  docker-compose up -d
+  log "docker-compose -p $project_name up -d"
+  docker-compose -p $project_name up -d
 }
 
 down () {
@@ -66,8 +66,8 @@ down () {
     exit 0
   fi
 
-  log "docker-compose down"
-  docker-compose down
+  log "docker-compose -p $project_name down"
+  docker-compose -p $project_name down
 }
 
 drush () {
@@ -107,9 +107,9 @@ sqlc () {
     exit 0
   fi
 
-  log "docker exec --user=$(id -u) -it $mysql_container /bin/bash -c 'mysql -A -u \$MYSQL_USER -p\$MYSQL_PASSWORD \$MYSQL_DATABASE'"
+  log "docker exec --user=$(id -u) -it $mysql_container /bin/sh -c 'mysql -A -u \$MYSQL_USER -p\$MYSQL_PASSWORD \$MYSQL_DATABASE'"
 
-  docker exec --user=$(id -u) -it $mysql_container /bin/bash -c 'mysql -A -u $MYSQL_USER -p$MYSQL_PASSWORD $MYSQL_DATABASE'
+  docker exec --user=$(id -u) -it $mysql_container /bin/sh -c 'mysql -A -u $MYSQL_USER -p$MYSQL_PASSWORD $MYSQL_DATABASE'
 }
 
 shell () {
@@ -148,7 +148,7 @@ install-prepare () {
   fi
 
   permissions \
-  && docker run --rm -i $drocker_env_files --volumes-from=$drupal_container --net=$docker_network $drupal_cli_image /bin/ash -c "\
+    && docker run --rm --user $(id -u) -i $drocker_env_files --volumes-from=$drupal_container --net=$docker_network $drupal_cli_image /bin/ash -c "\
     ln -sf /var/www/files /var/www/html/sites/default/files \
     && settingsFile=/var/www/html/sites/default/settings.php \
       && if [[ ! -e \$settingsFile ]]; then \
@@ -171,7 +171,7 @@ permissions () {
     exit 0
   fi
 
-  docker run --rm -i $drocker_env_files --volumes-from=$drupal_container --net=$docker_network $drupal_cli_image /bin/ash -c "\
+  docker run --rm --user $(id -u) -i $drocker_env_files --volumes-from=$drupal_container --net=$docker_network $drupal_cli_image /bin/ash -c "\
     mkdir -p /var/www/html /var/www/private /var/www/settings /var/www/files /var/www/config \
     && chown -R $(id -u):www-data /var/www/html /var/www/private /var/www/settings /var/www/files /var/www/config \
     && find /var/www/html /var/www/settings -type d -exec chmod 755 {} \+ \
