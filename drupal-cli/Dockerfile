@@ -3,29 +3,36 @@ FROM gabesullice/drocker-php-fpm
 RUN apk add --no-cache \
       mysql-client
 
+RUN ln -sf /home/drupal-cli/bin/composer /usr/local/bin/composer \
+      && ln -sf /home/drupal-cli/bin/drupal /usr/local/bin/drupal \
+      && ln -sf /home/drupal-cli/bin/drush /usr/local/bin/drush
+
+RUN adduser -D -h /home/drupal-cli drupal-cli
+USER drupal-cli
+
 # Install composer
-ADD https://getcomposer.org/installer /tmp/composer-setup.php
-RUN php /tmp/composer-setup.php --filename=composer --install-dir=/usr/local/bin \
+RUN curl -Ss https://getcomposer.org/installer -o /tmp/composer-setup.php
+RUN mkdir -p /home/drupal-cli/bin && php /tmp/composer-setup.php --filename=composer --install-dir=/home/drupal-cli/bin \
     && rm /tmp/composer-setup.php
 
 # Install drush
-RUN wget http://files.drush.org/drush.phar \
-      && php drush.phar core-status \
-      && chmod +x drush.phar \
-      && mv drush.phar /usr/local/bin/drush \
+RUN curl -Ss http://files.drush.org/drush.phar -o /tmp/drush.phar \
+      && php /tmp/drush.phar core-status \
+      && chmod +x /tmp/drush.phar \
+      && mv /tmp/drush.phar /home/drupal-cli/bin/drush \
       && drush init -y
 
 # Install drupal console
-ADD https://drupalconsole.com/installer /tmp/drupal.phar
-RUN php /tmp/drupal.phar \
-    && mv /tmp/drupal.phar /usr/local/bin/drupal \
-    && chmod +x /usr/local/bin/drupal \
+RUN curl -Ss https://drupalconsole.com/installer -o /tmp/drupal.phar \
+    && php /tmp/drupal.phar \
+    && mv /tmp/drupal.phar /home/drupal-cli/bin/drupal \
+    && chmod +x /home/drupal-cli/bin/drupal \
     && drupal init --override \
-    && sed -i /mysql/d /root/.console/phpcheck.yml
+    && sed -i /mysql/d /home/drupal-cli/.console/phpcheck.yml
 
 # Install drupal code sniffers
 RUN composer global require drupal/coder \
-  && /bin/sh -c 'printf "export PATH=$PATH:/root/.composer/vendor/bin" >> /root/.profile'
-RUN /root/.composer/vendor/bin/phpcs --config-set installed_paths /root/.composer/vendor/drupal/coder/coder_sniffer
+  && /bin/sh -c 'printf "export PATH=$PATH:/home/drupal-cli/.composer/vendor/bin" >> /home/drupal-cli/.profile'
+RUN /home/drupal-cli/.composer/vendor/bin/phpcs --config-set installed_paths /home/drupal-cli/.composer/vendor/drupal/coder/coder_sniffer
 
 WORKDIR /var/www/html
