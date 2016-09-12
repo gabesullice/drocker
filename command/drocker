@@ -148,7 +148,7 @@ install-prepare () {
   fi
 
   permissions \
-    && docker run --rm --user $(id -u) -i $drocker_env_files --volumes-from=$drupal_container --net=$docker_network $drupal_cli_image /bin/ash -c "\
+    && sudo docker run --rm -i -u root $drocker_env_files --volumes-from=$drupal_container --net=$docker_network $drupal_cli_image /bin/ash -c "\
     ln -sf /var/www/files /var/www/html/sites/default/files \
     && settingsFile=/var/www/html/sites/default/settings.php \
       && if [[ ! -e \$settingsFile ]]; then \
@@ -171,9 +171,18 @@ permissions () {
     exit 0
   fi
 
-  docker run --rm --user $(id -u) -i $drocker_env_files --volumes-from=$drupal_container --net=$docker_network $drupal_cli_image /bin/ash -c "\
+  sudo docker run --rm -i -u root $drocker_env_files --volumes-from=$drupal_container --net=$docker_network $drupal_cli_image /bin/ash -c "\
     mkdir -p /var/www/html /var/www/private /var/www/settings /var/www/files /var/www/config \
-    && chown -R $(id -u):www-data /var/www/html /var/www/private /var/www/settings /var/www/files /var/www/config \
+    && chown -R $(id -u):www-data \
+      /var/www/html \
+      /var/www/private \
+      /var/www/settings \
+      /var/www/files \
+      /var/www/config \
+      /var/www/html/modules \
+      /var/www/html/vendor \
+      /var/www/html/composer.json \
+      /var/www/html/composer.lock \
     && find /var/www/html /var/www/settings -type d -exec chmod 755 {} \+ \
     && find /var/www/html /var/www/settings -type f -exec chmod 744 {} \+ \
     && find /var/www/files /var/www/private /var/www/config -type d -exec chmod 775 {} \+ \
