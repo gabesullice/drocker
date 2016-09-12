@@ -20,7 +20,7 @@ Dockerfile.development:
 
 .data/drupal/private/hash_salt.txt: .data
 	mkdir -p $(shell dirname $@)
-	head -c 100 /dev/urandom | base64 -w0 > $@
+	head -c 100 /dev/urandom | base64 | tr -d '\n' > $@
 
 .data:
 	cp -r $(DROCKER_DIRECTORY)/bootstrap/.data.d$(DRUPAL_VERSION).example ./.data
