@@ -9,6 +9,7 @@ RUN apk add --no-cache \
       libxml2-dev 
 
 RUN NPROC=$(grep -c ^processor /proc/cpuinfo 2>/dev/null || 1) && docker-php-ext-install -j${NPROC} \
+      bcmath \
       iconv \
       mcrypt \
       mbstring \
