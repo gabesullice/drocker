@@ -22,7 +22,7 @@ main () {
   fi
 
   if [ "$subcmd" = "help" ]; then
-    local commands=( "bootstrap" "connect" "down" "drush" "errors" "install-prepare" "permissions" "shell" "sqlc" "sql-import" "up" )
+    local commands=( "bootstrap" "connect" "down" "build" "refresh" "drush" "errors" "install-prepare" "permissions" "shell" "sqlc" "sql-import" "up" )
     printf "Possible subcmds are:\n"
     printf "\t%s\n" "${commands[@]}"
     printf "For more information about these commands, see %b [SUBCMD] help.\n" $script_name
@@ -51,7 +51,7 @@ remote () {
 up () {
   if [ "$1" = "help" ]; then
     printf "Usage: %b %b\n" $script_name $FUNCNAME
-    printf "Alias for \`docker-compose up -d\`"
+    printf "Alias for \`docker-compose up -d\`\n"
     exit 0
   fi
 
@@ -62,12 +62,33 @@ up () {
 down () {
   if [ "$1" = "help" ]; then
     printf "Usage: %b %b\n" $script_name $FUNCNAME
-    printf "Alias for \`docker-compose down\`"
+    printf "Alias for \`docker-compose down\`\n"
     exit 0
   fi
 
   log "docker-compose -p $project_name down"
   docker-compose -p $project_name down
+}
+
+build () {
+  if [ "$1" = "help" ]; then
+    printf "Usage: %b %b\n" $script_name $FUNCNAME
+    printf "Alias for \`docker-compose build\`\n"
+    exit 0
+  fi
+
+  log "docker-compose -p $project_name build"
+  docker-compose -p $project_name build
+}
+
+refresh () {
+  if [ "$1" = "help" ]; then
+    printf "Usage: %b %b\n" $script_name $FUNCNAME
+    printf "Alias for \`docker-compose down && docker-compose build && docker-compose up\`\n"
+    exit 0
+  fi
+
+  down && build && up
 }
 
 drush () {
