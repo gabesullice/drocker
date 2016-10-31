@@ -22,7 +22,7 @@ main () {
   fi
 
   if [ "$subcmd" = "help" ]; then
-    local commands=( "bootstrap" "connect" "down" "build" "refresh" "drush" "errors" "install-prepare" "permissions" "shell" "sqlc" "sql-import" "up" )
+    local commands=( "new" "scaffold" "bootstrap" "connect" "down" "build" "refresh" "drush" "errors" "install-prepare" "permissions" "shell" "sqlc" "sql-import" "up" )
     printf "Possible subcmds are:\n"
     printf "\t%s\n" "${commands[@]}"
     printf "For more information about these commands, see %b [SUBCMD] help.\n" $script_name
@@ -248,10 +248,35 @@ configure () {
   fi
 }
 
+new () {
+  if [ "$1" = "help" ]; then
+    printf "Usage: %b %b\n" $script_name $FUNCNAME
+    printf "Starts a new drocker project from scratch."
+    exit 0
+  fi
+
+  scaffold
+  bootstrap
+  drush si
+}
+
+scaffold () {
+  if [ "$1" = "help" ]; then
+    printf "Usage: %b %b\n" $script_name $FUNCNAME
+    printf "Scaffolds a new drocker project from scratch without bootstrapping or installing anything."
+    exit 0
+  fi
+
+  curl -sS -Lo ./install.sh https://raw.githubusercontent.com/gabesullice/drocker/master/bootstrap/install.sh \
+    && chmod u+x ./install.sh \
+    && ./install.sh \
+    && rm ./install.sh
+}
+
 bootstrap () {
   if [ "$1" = "help" ]; then
     printf "Usage: %b %b\n" $script_name $FUNCNAME
-    printf "Bootstraps a new drocker project."
+    printf "Bootstraps a new drocker project after the scaffolding has been created."
     exit 0
   fi
 
