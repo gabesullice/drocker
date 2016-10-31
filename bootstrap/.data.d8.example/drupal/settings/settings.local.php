@@ -1,8 +1,5 @@
 <?php
 
-$settings['hash_salt'] = file_get_contents('/var/www/private/hash_salt.txt');
-$config_directories['sync'] = '/var/www/config/sync';
-
 // You may uncomment this once you have a database installed.
 //$databases['default']['default'] = array(
 //  'database' => 'drocker',
@@ -12,3 +9,9 @@ $config_directories['sync'] = '/var/www/config/sync';
 //  'port' => '3306',
 //  'driver' => 'mysql',
 //);
+
+$config_directories['sync'] = '/var/www/config/sync';
+
+$settings['hash_salt'] = file_get_contents('/var/www/private/hash_salt.txt');
+$settings['install_profile'] = 'standard';
+$settings['file_private_path'] = '/var/www/private';

@@ -3,10 +3,9 @@ VENDOR_DIRECTORY=./vendor
 DROCKER_DIRECTORY=$(VENDOR_DIRECTORY)/drocker
 
 init: docker-compose.yml Dockerfile Dockerfile.development .data/drupal/private/hash_salt.txt .dockerignore .data
+	rm -rf $(DROCKER_DIRECTORY)
 
 deinit:
-	- rm -rf $(DROCKER_DIRECTORY)
-	- rm ./drocker
 	- rm ./docker-compose.yml
 	- rm ./Dockerfile
 	- rm ./Dockerfile.development
@@ -37,4 +36,4 @@ drocker: vendor
 vendor:
 	mkdir -p $(VENDOR_DIRECTORY)
 
-.PHONY: deinit drocker
+.PHONY: init deinit drocker

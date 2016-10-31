@@ -1,4 +1,4 @@
-FROM gabesullice/drocker-drupal-8:8.1
+FROM gabesullice/drocker-drupal-8:8.2
 
 # Install xdebug
 RUN pecl install xdebug-beta && docker-php-ext-enable xdebug
