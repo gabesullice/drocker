@@ -19,12 +19,12 @@ pushd $HOME
 mkdir -p lib bin
 git clone https://github.com/gabesullice/drocker.git ./lib/drocker
 ln -sf $HOME/lib/drocker/command/drocker ./bin/drocker
-which drocker || $(echo "PATH=$PATH:$HOME/bin" >> .bashrc)
+which drocker || $(echo 'PATH=$PATH:$HOME/bin' >> .bashrc)
 popd
 ```
 
 ## Setting Up a Project
-If you already have the drocker cli, docker and docker-compose installed, you can follow these steps to set up a new drocker site with one command:
+If you already have the drocker cli, docker and docker-compose installed, you can follow these steps to completely set up a new drocker site:
 
 ```sh
 # Create a directory for you project
