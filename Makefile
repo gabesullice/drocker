@@ -8,11 +8,12 @@ default: drocker-drupal-8 drocker-drupal-7 drocker-drupal-cli drocker-php-fpm dr
 
 drocker-drupal-8: php-fpm
 	$(BUILD_CMD) -t $(DOCKER_NAMESPACE)/drocker-drupal-8 drupal-8/8.2
-	$(PUSH_CMD) $(DOCKER_NAMESPACE)/drocker-drupal-8:latest
 	$(BUILD_CMD) -t $(DOCKER_NAMESPACE)/drocker-drupal-8:8.2 drupal-8/8.2
+	#$(BUILD_CMD) -t $(DOCKER_NAMESPACE)/drocker-drupal-8:8.3 drupal-8/8.3
+	$(PUSH_CMD) $(DOCKER_NAMESPACE)/drocker-drupal-8
+	$(PUSH_CMD) $(DOCKER_NAMESPACE)/drocker-drupal-8:latest
 	$(PUSH_CMD) $(DOCKER_NAMESPACE)/drocker-drupal-8:8.2
-	$(BUILD_CMD) -t $(DOCKER_NAMESPACE)/drocker-drupal-8:8.3 drupal-8/8.3
-	$(PUSH_CMD) $(DOCKER_NAMESPACE)/drocker-drupal-8:8.3
+	#$(PUSH_CMD) $(DOCKER_NAMESPACE)/drocker-drupal-8:8.3
 
 drocker-drupal-7: php-fpm
 	$(BUILD_CMD) -t $(DOCKER_NAMESPACE)/drocker-drupal-7 drupal-7

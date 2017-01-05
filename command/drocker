@@ -22,7 +22,7 @@ main () {
   fi
 
   if [ "$subcmd" = "help" ]; then
-    local commands=( "new" "scaffold" "bootstrap" "connect" "down" "build" "refresh" "drush" "errors" "install-prepare" "permissions" "shell" "sqlc" "sql-import" "up" )
+    local commands=( "init" "scaffold" "bootstrap" "connect" "down" "build" "refresh" "drush" "errors" "install-prepare" "permissions" "shell" "sqlc" "sql-import" "up" )
     printf "Possible subcmds are:\n"
     printf "\t%s\n" "${commands[@]}"
     printf "For more information about these commands, see %b [SUBCMD] help.\n" $script_name
@@ -248,7 +248,7 @@ configure () {
   fi
 }
 
-new () {
+init () {
   if [ "$1" = "help" ]; then
     printf "Usage: %b %b\n" $script_name $FUNCNAME
     printf "Starts a new drocker project from scratch."
@@ -256,8 +256,10 @@ new () {
   fi
 
   scaffold
+  build
   bootstrap
   drush si
+  permissions
 }
 
 scaffold () {
@@ -284,9 +286,16 @@ bootstrap () {
   local default_dir=$drupal_root/sites/default
 
   if [[ ! -e ./docroot ]]; then $(which drush) dl --drupal-project-rename=docroot drupal; fi
-  if [[ ! -e $default_dir/settings.php ]]; then cp $default_dir/default.settings.php $default_dir/settings.php; fi
+  if [[ ! -e $default_dir/settings.php ]]; then
+    cp $default_dir/default.settings.php $default_dir/settings.php
+    cat << EOF >> $default_dir/settings.php
+if (file_exists(__DIR__ . '/settings.local.php')) {                           
+  include __DIR__ . '/settings.local.php';                                    
+}
+EOF
+  fi
 
-  docker-compose up -d
+  up
   install-prepare
 }
 

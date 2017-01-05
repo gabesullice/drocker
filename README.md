@@ -27,15 +27,12 @@ popd
 If you already have the drocker cli, docker and docker-compose installed, you can follow these steps to completely set up a new drocker site:
 
 ```sh
-# Create a directory for you project
 mkdir mynewproject
 cd mynewproject
-drocker new
+drocker init
 ```
 
-From here, you will have a basic Dockerfile and docker-compose.yml ready to go. You can make any modifications you need for your project in those, like extra shared volumes, overwriting `robots.txt`, etc.
-
-Now, run `docker-compose build` to check that your Dockerfile builds correctly. If so, run `docker-compose up -d`. If everything went without a problem, you're all done! You can visit `127.0.0.1` to see your new site.
+If everything went without a problem, you're all done! You can visit `127.0.0.1` to see your new site.
 
 ## Anti-Features
 As is mentioned above, Drocker tries to be minimalistic and get out of your way. That means that there are some things that we just won't try to do for you. That said, most, if not all the features an opinionated VM might give you are completely possible to achieve and we have a [Wiki](https://github.com/gabesullice/drocker/wiki) to show you how to do those things yourself.
