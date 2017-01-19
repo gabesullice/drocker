@@ -9,7 +9,6 @@ project_name=$(basename $PWD | sed 's/-//g' | sed 's/_//g')
 drupal_cli_image=gabesullice/drocker-drupal-cli
 mysql_container=$(printf "%b%b" $project_name "_mysql_1")
 drupal_container=$(printf "%b%b" $project_name "_drupal_1")
-docker_network=$(printf "%b%b" $project_name "_default")
 drocker_env_files=""
 
 main () {
@@ -243,9 +242,10 @@ configure () {
     drupal_cli_image=${DROCKER_CLI_IMAGE:=$drupal_cli_image}
     mysql_container=${DROCKER_MYSQL_CONTAINER:=$mysql_container}
     drupal_container=${DROCKER_DRUPAL_CONTAINER:=$drupal_container}
-    docker_network=${DROCKER_DOCKER_NETWORK:=$docker_network}
+    docker_network=${DROCKER_DOCKER_NETWORK:=`docker inspect -f "{{range .NetworkSettings.Networks}}{{.NetworkID}}{{end}}" $mysql_container | head -c 7`}
     drocker_env_files=${DROCKER_ENV_FILES:=$drocker_env_files}
   fi
+
 }
 
 init () {
