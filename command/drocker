@@ -258,7 +258,8 @@ configure () {
     drupal_testing_image=${DROCKER_TESTING_IMAGE:=$drupal_testing_image}
     mysql_container=${DROCKER_MYSQL_CONTAINER:=$mysql_container}
     drupal_container=${DROCKER_DRUPAL_CONTAINER:=$drupal_container}
-    docker_network=${DROCKER_DOCKER_NETWORK:=`docker inspect -f "{{range .NetworkSettings.Networks}}{{.NetworkID}}{{end}}" $mysql_container | head -c 7`}
+    discovered_network=$(docker inspect -f "{{range .NetworkSettings.Networks}}{{.NetworkID}}{{end}}" $mysql_container | head -c 7)
+    docker_network=${DROCKER_DOCKER_NETWORK:=$discovered_network}
     drocker_env_files=${DROCKER_ENV_FILES:=$drocker_env_files}
   fi
 
