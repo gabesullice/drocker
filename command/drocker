@@ -7,6 +7,7 @@ script_name=$(basename $0)
 # Define container and networking defaults
 project_name=$(basename $PWD | sed 's/-//g' | sed 's/_//g')
 drupal_cli_image=gabesullice/drocker-drupal-cli
+drupal_testing_image=gabesullice/drocker-drupal-testing
 mysql_container=$(printf "%b%b" $project_name "_mysql_1")
 drupal_container=$(printf "%b%b" $project_name "_drupal_1")
 drocker_env_files=""
@@ -21,7 +22,7 @@ main () {
   fi
 
   if [ "$subcmd" = "help" ]; then
-    local commands=( "init" "scaffold" "bootstrap" "connect" "down" "build" "refresh" "drush" "errors" "install-prepare" "permissions" "shell" "sqlc" "sql-import" "up" )
+    local commands=( "init" "scaffold" "bootstrap" "connect" "down" "test" "build" "refresh" "drush" "errors" "install-prepare" "permissions" "shell" "sqlc" "sql-import" "up" )
     printf "Possible subcmds are:\n"
     printf "\t%s\n" "${commands[@]}"
     printf "For more information about these commands, see %b [SUBCMD] help.\n" $script_name
@@ -158,6 +159,20 @@ sql-import () {
   docker run --rm -i $drocker_env_files --volumes-from=$drupal_container --net=$docker_network $drupal_cli_image drush sql-cli < $1
 }
 
+test () {
+  local args=${@:1}
+
+  if [ "$1" = "help" ]; then
+    printf "Usage: %b %b [...run-tests.sh args]\n" $script_name $FUNCNAME
+    printf "Run drupal's built-in test runner script. This command simply prefixes the your shell command with the appropriate docker command. You will need to escape any quotes with a \\.\n"
+    exit 0
+  fi
+
+  log "docker run --rm -i $drocker_env_files --volumes-from=$drupal_container --net=$docker_network $drupal_testing_image --sqlite /tmp/db.sqlite --dburl sqlite://localhost//tmp/db.sqlite $args"
+
+  docker run --rm -i $drocker_env_files --volumes-from=$drupal_container --net=$docker_network $drupal_testing_image --sqlite /tmp/db.sqlite --dburl sqlite://localhost//tmp/db.sqlite $args
+}
+
 install-prepare () {
   local args=${@:1}
 
@@ -240,6 +255,7 @@ configure () {
     source $config_file
     project_name=${DROCKER_PROJECT_NAME:=$project_name}
     drupal_cli_image=${DROCKER_CLI_IMAGE:=$drupal_cli_image}
+    drupal_testing_image=${DROCKER_TESTING_IMAGE:=$drupal_testing_image}
     mysql_container=${DROCKER_MYSQL_CONTAINER:=$mysql_container}
     drupal_container=${DROCKER_DRUPAL_CONTAINER:=$drupal_container}
     docker_network=${DROCKER_DOCKER_NETWORK:=`docker inspect -f "{{range .NetworkSettings.Networks}}{{.NetworkID}}{{end}}" $mysql_container | head -c 7`}
