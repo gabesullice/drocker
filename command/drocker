@@ -10,6 +10,7 @@ drupal_cli_image=gabesullice/drocker-drupal-cli
 drupal_testing_image=gabesullice/drocker-drupal-testing
 mysql_container=$(printf "%b%b" $project_name "_mysql_1")
 drupal_container=$(printf "%b%b" $project_name "_drupal_1")
+web_root=/var/www/html
 drocker_env_files=""
 
 main () {
@@ -100,9 +101,9 @@ drush () {
     exit 0
   fi
 
-  log "docker run --user=$(id -u) --rm -i $drocker_env_files --volumes-from=$drupal_container --net=$docker_network $drupal_cli_image drush $args"
+  log "docker run --user=$(id -u) --rm -i $drocker_env_files -w $web_root --volumes-from=$drupal_container --net=$docker_network $drupal_cli_image drush $args"
 
-  docker run --user=$(id -u) --rm -i $drocker_env_files --volumes-from=$drupal_container --net=$docker_network $drupal_cli_image drush $args
+  docker run --user=$(id -u) --rm -i $drocker_env_files -w $web_root --volumes-from=$drupal_container --net=$docker_network $drupal_cli_image drush $args
 }
 
 errors () {
@@ -168,9 +169,9 @@ test () {
     exit 0
   fi
 
-  log "docker run --rm -i $drocker_env_files --volumes-from=$drupal_container --net=$docker_network $drupal_testing_image --sqlite /tmp/db.sqlite --dburl sqlite://localhost//tmp/db.sqlite $args"
+  log "docker run --rm -i $drocker_env_files -w $web_root $web--volumes-from=$drupal_container --net=$docker_network $drupal_testing_image --sqlite /tmp/db.sqlite --dburl sqlite://localhost//tmp/db.sqlite $args"
 
-  docker run --rm -i $drocker_env_files --volumes-from=$drupal_container --net=$docker_network $drupal_testing_image --sqlite /tmp/db.sqlite --dburl sqlite://localhost//tmp/db.sqlite $args
+  docker run --rm -i $drocker_env_files -w $web_root --volumes-from=$drupal_container --net=$docker_network $drupal_testing_image --sqlite /tmp/db.sqlite --dburl sqlite://localhost//tmp/db.sqlite $args
 }
 
 install-prepare () {
@@ -184,10 +185,10 @@ install-prepare () {
 
   permissions \
     && sudo docker run --rm -i -u root $drocker_env_files --volumes-from=$drupal_container --net=$docker_network $drupal_cli_image /bin/ash -c "\
-    ln -sf /var/www/files /var/www/html/sites/default/files \
-    && settingsFile=/var/www/html/sites/default/settings.php \
+    ln -sf /var/www/files $web_root/sites/default/files \
+    && settingsFile=$web_root/sites/default/settings.php \
       && if [[ ! -e \$settingsFile ]]; then \
-        cp /var/www/html/sites/default/default.settings.php \$settingsFile; \
+        cp $web_root/sites/default/default.settings.php \$settingsFile; \
       fi\
       && if [[ -e \$settingsFile ]]; then \
         chown $(id -u):www-data \$settingsFile; \
@@ -207,25 +208,25 @@ permissions () {
   fi
 
   sudo docker run --rm -i -u root $drocker_env_files --volumes-from=$drupal_container --net=$docker_network $drupal_cli_image /bin/ash -c "\
-    mkdir -p /var/www/html /var/www/private /var/www/settings /var/www/files /var/www/config \
-    && chown -R $(id -u):www-data \
-      /var/www/html \
+    mkdir -p $web_root /var/www/private /var/www/settings /var/www/files /var/www/config \
+    ; chown -R $(id -u):www-data \
+      $web_root \
       /var/www/private \
       /var/www/settings \
       /var/www/files \
       /var/www/config \
-      /var/www/html/modules \
-      /var/www/html/vendor \
-      /var/www/html/composer.json \
-      /var/www/html/composer.lock \
-    && find /var/www/html /var/www/settings -type d -exec chmod 755 {} \+ \
-    && find /var/www/html /var/www/settings -type f -exec chmod 744 {} \+ \
-    && find /var/www/files /var/www/private /var/www/config -type d -exec chmod 775 {} \+ \
-    && find /var/www/files /var/www/private /var/www/config -type f -exec chmod 764 {} \+ \
-    && settingsFile=/var/www/html/sites/default/settings.php && if [[ -e \$settingsFile ]]; then chmod 644 \$settingsFile; fi\
-    && settingsFile=/var/www/html/sites/default/services.yml && if [[ -e \$settingsFile ]]; then chmod 644 \$settingsFile; fi\
-    && settingsFile=/var/www/html/sites/default/settings.local.php && if [[ -e \$settingsFile ]]; then chmod 644 \$settingsFile; fi\
-    && settingsFile=/var/www/html/sites/default/local-settings.inc && if [[ -e \$settingsFile ]]; then chmod 644 \$settingsFile; fi"
+      $web_root/modules \
+      $web_root/vendor \
+      $web_root/composer.json \
+      $web_root/composer.lock \
+    ; find $web_root /var/www/settings -type d -exec chmod 755 {} \+ \
+    ; find $web_root /var/www/settings -type f -exec chmod 744 {} \+ \
+    ; find /var/www/files /var/www/private /var/www/config -type d -exec chmod 775 {} \+ \
+    ; find /var/www/files /var/www/private /var/www/config -type f -exec chmod 764 {} \+ \
+    ; settingsFile=$web_root/sites/default/settings.php && if [[ -e \$settingsFile ]]; then chmod 644 \$settingsFile; fi\
+    ; settingsFile=$web_root/sites/default/services.yml && if [[ -e \$settingsFile ]]; then chmod 644 \$settingsFile; fi\
+    ; settingsFile=$web_root/sites/default/settings.local.php && if [[ -e \$settingsFile ]]; then chmod 644 \$settingsFile; fi\
+    ; settingsFile=$web_root/sites/default/local-settings.inc && if [[ -e \$settingsFile ]]; then chmod 644 \$settingsFile; fi"
 }
 
 connect () {
@@ -261,6 +262,7 @@ configure () {
     discovered_network=$(docker inspect -f "{{range .NetworkSettings.Networks}}{{.NetworkID}}{{end}}" $mysql_container | head -c 7)
     docker_network=${DROCKER_DOCKER_NETWORK:=$discovered_network}
     drocker_env_files=${DROCKER_ENV_FILES:=$drocker_env_files}
+    web_root=${DROCKER_WEBROOT:=/var/www/html}
   fi
 
 }
