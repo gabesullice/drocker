@@ -169,9 +169,23 @@ test () {
     exit 0
   fi
 
-  log "docker run --rm -i $drocker_env_files -w $web_root $web--volumes-from=$drupal_container --net=$docker_network $drupal_testing_image --sqlite /tmp/db.sqlite --dburl sqlite://localhost//tmp/db.sqlite $args"
+  log "docker run --rm -i $drocker_env_files -w $web_root --volumes-from=$drupal_container --net=$docker_network $drupal_testing_image --sqlite /tmp/db.sqlite --dburl sqlite://localhost//tmp/db.sqlite $args"
 
   docker run --rm -i $drocker_env_files -w $web_root --volumes-from=$drupal_container --net=$docker_network $drupal_testing_image --sqlite /tmp/db.sqlite --dburl sqlite://localhost//tmp/db.sqlite $args
+}
+
+behat () {
+  local args=${@:1}
+
+  if [ "$1" = "help" ]; then
+    printf "Usage: %b %b [...args]\n" $script_name $FUNCNAME
+    printf "Same as running behat directly."
+    exit 0
+  fi
+
+  log "docker run --rm -i $drocker_env_files -w $web_root/sites/default/behat-tests --volumes-from=$drupal_container --entrypoint /usr/local/bin/behat --net=$docker_network $drupal_testing_image $args"
+
+  docker run --rm -i $drocker_env_files -w $web_root/sites/default/behat-tests --volumes-from=$drupal_container --entrypoint /usr/local/bin/behat --net=$docker_network $drupal_testing_image $args
 }
 
 install-prepare () {
@@ -207,26 +221,48 @@ permissions () {
     exit 0
   fi
 
-  sudo docker run --rm -i -u root $drocker_env_files --volumes-from=$drupal_container --net=$docker_network $drupal_cli_image /bin/ash -c "\
-    mkdir -p $web_root /var/www/private /var/www/settings /var/www/files /var/www/config \
-    ; chown -R $(id -u):www-data \
-      $web_root \
-      /var/www/private \
-      /var/www/settings \
-      /var/www/files \
-      /var/www/config \
-      $web_root/modules \
-      $web_root/vendor \
-      $web_root/composer.json \
-      $web_root/composer.lock \
-    ; find $web_root /var/www/settings -type d -exec chmod 755 {} \+ \
-    ; find $web_root /var/www/settings -type f -exec chmod 744 {} \+ \
-    ; find /var/www/files /var/www/private /var/www/config -type d -exec chmod 775 {} \+ \
-    ; find /var/www/files /var/www/private /var/www/config -type f -exec chmod 764 {} \+ \
-    ; settingsFile=$web_root/sites/default/settings.php && if [[ -e \$settingsFile ]]; then chmod 644 \$settingsFile; fi\
-    ; settingsFile=$web_root/sites/default/services.yml && if [[ -e \$settingsFile ]]; then chmod 644 \$settingsFile; fi\
-    ; settingsFile=$web_root/sites/default/settings.local.php && if [[ -e \$settingsFile ]]; then chmod 644 \$settingsFile; fi\
-    ; settingsFile=$web_root/sites/default/local-settings.inc && if [[ -e \$settingsFile ]]; then chmod 644 \$settingsFile; fi"
+  local chown=( \
+    /var/www/files \
+    /var/www/private \
+    /var/www/config \
+    /var/www/settings \
+    $web_root \
+    $web_root/modules \
+    $web_root/vendor \
+    $web_root/composer.json \
+    $web_root/composer.lock \
+    )
+
+  #local docker_options="run --rm -i -u root $drocker_env_files --volumes-from=$drupal_container --net=$docker_network $drupal_cli_image"
+  local docker_options="exec -i -u root $drupal_container"
+  for file in "${chown[@]}"; do
+    log "sudo docker $docker_options /bin/ash -c \"if [[ -e $file ]]; then chown -R $(id -u):www-data $file; fi\""
+    sudo docker $docker_options /bin/ash -c "if [[ -e $file ]]; then chown -R $(id -u):www-data $file; fi"
+  done
+
+  local chmod=( \
+    "find $web_root /var/www/settings -type d -exec chmod 755 {} \+" \
+    "find $web_root /var/www/settings -type f -exec chmod 744 {} \+" \
+    "find /var/www/files /var/www/private /var/www/config -type d -exec chmod 775 {} \+" \
+    "find /var/www/files /var/www/private /var/www/config -type f -exec chmod 764 {} \+" \
+    )
+
+  for cmd in "${chmod[@]}"; do
+    log "sudo docker $docker_options /bin/ash -c \"$cmd\""
+    sudo docker $docker_options /bin/ash -c "$cmd"
+  done
+
+  local config_files=( \
+    "$web_root/sites/default/settings.php" \
+    "$web_root/sites/default/services.yml" \
+    "$web_root/sites/default/settings.local.php" \
+    "$web_root/sites/default/local-settings.inc" \
+    )
+
+  for config_file in "${config_files[@]}"; do
+    log "sudo docker $docker_options /bin/ash -c \"if [[ -e $config_file ]]; then chmod 644 $config_file; fi\""
+    sudo docker $docker_options /bin/ash -c "if [[ -e $config_file ]]; then chmod 644 $config_file; fi"
+  done
 }
 
 connect () {
