@@ -243,8 +243,8 @@ permissions () {
   local chmod=( \
     "find $web_root /var/www/settings -type d -exec chmod 755 {} \+" \
     "find $web_root /var/www/settings -type f -exec chmod 744 {} \+" \
-    "find /var/www/files /var/www/private /var/www/config -type d -exec chmod 775 {} \+" \
-    "find /var/www/files /var/www/private /var/www/config -type f -exec chmod 764 {} \+" \
+    "find $web_root/sites/default/files /var/www/files /var/www/private /var/www/config -type d -exec chmod 775 {} \+" \
+    "find $web_root/sites/default/files /var/www/files /var/www/private /var/www/config -type f -exec chmod 764 {} \+" \
     )
 
   for cmd in "${chmod[@]}"; do
@@ -272,9 +272,11 @@ connect () {
     exit 0
   fi
 
-  log "docker run --rm -it $drocker_env_files --volumes-from=$drupal_container --net=$docker_network $drupal_cli_image /bin/ash -l"
+  local drocker_host=$(ip route | awk '/default/ { print $7 }')
 
-  docker run --rm -it $drocker_env_files --volumes-from=$drupal_container --net=$docker_network $drupal_cli_image /bin/ash -l
+  log "docker run --rm --add-host drocker_host:$drocker_host -it $drocker_env_files --volumes-from=$drupal_container --net=$docker_network $drupal_cli_image /bin/ash -l"
+
+  docker run --rm --add-host drocker_host:$drocker_host -it $drocker_env_files --volumes-from=$drupal_container --net=$docker_network $drupal_cli_image /bin/ash -l
 }
 
 configure () {
